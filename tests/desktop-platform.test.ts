@@ -288,8 +288,10 @@ describe("desktop packaging policy", () => {
 		const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 		assert.equal(pkg.author.name, "Amos Blomqvist");
 		assert.equal(pkg.author.email, "255718537+amosblomqvist@users.noreply.github.com");
-		assert.equal(pkg.homepage, "https://github.com/amosblomqvist/learnharness");
-		assert.equal(pkg.desktopName, "learnharness.desktop");
+		// Language Harness keeps LearnHarness's author (copyright holder) and
+		// carries its own homepage and desktop identity.
+		assert.equal(pkg.homepage, "https://github.com/edtpui/language-harness");
+		assert.equal(pkg.desktopName, "language-harness.desktop");
 	});
 });
 

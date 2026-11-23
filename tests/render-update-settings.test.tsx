@@ -78,9 +78,10 @@ afterEach(async () => {
 });
 
 describe("version and contextual copy", () => {
-	it("build metadata comes from package.json and exposes only public version/homepage values", () => {
+	it("build metadata comes from package.json and exposes only public version/homepage/source values", () => {
 		const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
-		assert.deepEqual(nextConfig.env, { LH_VERSION: pkg.version, LH_HOMEPAGE: pkg.homepage });
+		// LH_SOURCE_URL is the AGPL source offer: the homepage unless the build overrides it.
+		assert.deepEqual(nextConfig.env, { LH_VERSION: pkg.version, LH_HOMEPAGE: pkg.homepage, LH_SOURCE_URL: process.env.LH_SOURCE_URL || pkg.homepage });
 	});
 
 	it("never claims live/latest information and keeps updater errors generic", () => {

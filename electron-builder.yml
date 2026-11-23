@@ -1,4 +1,6 @@
-# electron-builder config — LearnHarness desktop (macOS arm64; Windows/Linux x64).
+# electron-builder config — Language Harness desktop (macOS arm64; Windows/Linux x64),
+# a fork of LearnHarness. The signing notes below describe upstream's setup;
+# this fork ships unsigned (see mac.notarize).
 #
 # Shape (fact-checked 2026-09-17):
 #   - the app's real server (.next/standalone, curated by
@@ -9,20 +11,15 @@
 #   - signed + notarized since 2026-10-08 (Developer ID Application cert in
 #     the login keychain; notary credentials in the LH_NOTARY keychain
 #     profile; the profile + team env vars are baked into desktop:dist).
-appId: com.learnharness.LearnHarness
-productName: LearnHarness
+appId: io.github.edtpui.LanguageHarness
+productName: LanguageHarness
 directories:
   output: dist
-# Icons (owner ruling, 2026-10-13) — per-platform sources in build/:
-#   mac   build/icon.icon  — the Icon Composer document (layered Liquid
-#         Glass); actool (Xcode 26+) compiles Assets.car (CFBundleIconName,
-#         macOS 26+ renders the true layered icon) + an actool fallback icns
-#         capped at 256px, which scripts/after-pack.cjs swaps for the
-#         hand-packed full-res build/icon.icns (pre-Tahoe keeps 16→1024).
-#         Requires actool ≥ 26: desktop:dist injects DEVELOPER_DIR locally;
-#         the release workflow's mac job runs setup-xcode.
-#   win   build/icon.ico  — generated (16→256) from the flat design by
-#         scripts/make-icons.mjs.
+# Icons — per-platform files in build/, all generated from build/icon-flat.svg
+# by scripts/make-icons.mjs (Language Harness's own mark):
+#   mac   build/icon.icns — PNG entries 16→1024; scripts/after-pack.cjs
+#         copies the same file into the bundle after packaging.
+#   win   build/icon.ico  — 16→256.
 #   linux build/icon.png  — 512×512, same script. Rounded squircle with
 #         baked transparency on both (owner ruling) — Windows/Linux don't
 #         mask, the shape ships in the artwork.
@@ -105,7 +102,9 @@ mac:
   extraResources:
     - from: electron/server-title-guard.cjs
       to: server-title-guard.cjs
-  icon: build/icon.icon
+  # Language Harness: the generated full-res icns (scripts/make-icons.mjs);
+  # the fork has no layered Icon Composer document.
+  icon: build/icon.icns
   # zip rides next to dmg (flipped 2026-10-08): Squirrel.Mac — Electron's
   # macOS auto-updater — installs from ZIP and cannot read DMGs. DMG is
   # for humans; ZIP + blockmap are the updater's payload.
@@ -125,7 +124,10 @@ mac:
   # Laid for the STT milestone (researcher-verified): the TCC mic prompt
   # reads this string; macOS asks regardless of Electron's own handlers.
   extendInfo:
-    NSMicrophoneUsageDescription: "LearnHarness uses the microphone only for speech-to-text input into your sessions."
+    NSMicrophoneUsageDescription: "Language Harness uses the microphone only for speech-to-text input into your sessions."
+    # productName stays space-free for artifact and bundle names; Finder
+    # and the menu bar show the spaced name.
+    CFBundleDisplayName: "Language Harness"
   hardenedRuntime: true
   entitlements: build/entitlements.mac.plist
   # Signing + notarization (flipped 2026-10-08): identity auto-detects the
@@ -135,7 +137,10 @@ mac:
   # via the LH_NOTARY keychain profile, env baked into desktop:dist).
   # Adds minutes per build (Apple's scan queue). Verification battery:
   # codesign --verify --deep / spctl --assess / stapler validate.
-  notarize: true
+  # Language Harness fork: no Apple Developer ID or notary profile ships with
+  # the source, so local mac builds are unsigned unless whoever packages
+  # them supplies their own identity and turns notarization back on.
+  notarize: false
 dmg:
   title: "${productName} ${version}"
   # Owner artwork: 540×380 at 1×; the sibling background@2x.png is
@@ -165,6 +170,7 @@ win:
 nsis:
   oneClick: true
   perMachine: false
+  shortcutName: "Language Harness"
 linux:
   icon: build/icon.png
   target:
@@ -187,8 +193,10 @@ publish:
   # from a private repo are impossible, and a token baked into the app
   # would be a leak. desktop:dist passes no --publish flag, so builds never
   # upload; publishing happens at release time (GH_TOKEN + --publish).
+  # Language Harness reads its own releases, never upstream LearnHarness's:
+  # an upstream release must not "update" a fork install into LearnHarness.
   - provider: github
-    owner: amosblomqvist
-    repo: learnharness
+    owner: edtpui
+    repo: language-harness
     # All three CI jobs contribute assets; only the owner publishes it.
     releaseType: draft

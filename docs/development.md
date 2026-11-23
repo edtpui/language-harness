@@ -55,6 +55,7 @@ Nonsecret settings are deltas in `<data root>/settings.json`; absent values reso
 | `DEEPGRAM_API_KEY` | Optional dictation token minting. |
 | `CHROME_PATH` | Chrome/Chromium executable fallback for demo verification; Electron's browser helper is primary. No extra Chromium is downloaded. |
 | `LH_ALLOWED_HOSTS` | Browser-only mode: extra host names the API accepts besides `localhost` and IP addresses. Comma-separated, case-insensitive, port ignored, no wildcards. |
+| `LH_SOURCE_URL` | Build time: where the running code's source is published (the AGPL source link in the sidebar and Settings). Defaults to `package.json` `homepage`; set it when you deploy modified code. |
 
 Ordinary Next development can read `.env.local`. Real environment keys take precedence over saved keys. Saved auth is restrictive-permission plaintext, not an encrypted vault. Packaged Electron sets separate data/auth locations under `userData`; it does not use the repo development profile.
 

@@ -1,14 +1,24 @@
 {
-	"name": "learnharness",
+	"name": "language-harness",
 	"version": "0.7.0",
 	"license": "AGPL-3.0-only",
 	"author": {
 		"name": "Amos Blomqvist",
 		"email": "255718537+amosblomqvist@users.noreply.github.com"
 	},
-	"homepage": "https://github.com/amosblomqvist/learnharness",
-	"desktopName": "learnharness.desktop",
-	"description": "An agent harness for learning: adaptive teaching, practice, and a persistent knowledge graph.",
+	"contributors": [
+		{
+			"name": "edtpui",
+			"url": "https://github.com/edtpui"
+		}
+	],
+	"homepage": "https://github.com/edtpui/language-harness",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/edtpui/language-harness.git"
+	},
+	"desktopName": "language-harness.desktop",
+	"description": "A language-learning agent harness: placement, adaptive lessons and practice for any language, with pronunciation audio and a persistent knowledge graph. A fork of LearnHarness.",
 	"type": "module",
 	"private": true,
 	"main": "electron/main.cjs",
@@ -24,7 +34,7 @@
 		"plugins:build-core": "node scripts/build-core-plugins.mjs",
 		"desktop:dev": "concurrently -k \"npm run dev\" \"LH_DEV_URL=http://localhost:3000 electron .\"",
 		"dev:fresh": "bash scripts/dev-fresh.sh",
-		"desktop:dist": "rm -rf dist .next/standalone && npm run build && node scripts/smoke-provider-runtime.mjs && node scripts/build-server.mjs && node scripts/smoke-server.mjs && DEVELOPER_DIR=${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer} APPLE_KEYCHAIN_PROFILE=LH_NOTARY APPLE_TEAM_ID=JS6XN22HY6 electron-builder --mac --arm64"
+		"desktop:dist": "rm -rf dist .next/standalone && npm run build && node scripts/smoke-provider-runtime.mjs && node scripts/build-server.mjs && node scripts/smoke-server.mjs && DEVELOPER_DIR=${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer} electron-builder --mac --arm64"
 	},
 	"dependencies": {
 		"@earendil-works/pi-agent-core": "1.5.2",

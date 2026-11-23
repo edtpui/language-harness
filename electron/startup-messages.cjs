@@ -2,7 +2,9 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 
-const FEED_URL = "https://learnharness.ai/startup-messages.json";
+// Language Harness reads announcements from its own repository, never from
+// upstream LearnHarness's site. A missing file simply means no message.
+const FEED_URL = "https://raw.githubusercontent.com/edtpui/language-harness/main/startup-messages.json";
 const MAX_FEED_BYTES = 2 * 1024 * 1024;
 const STARTUP_WINDOW_MS = 3000;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,95}$/;

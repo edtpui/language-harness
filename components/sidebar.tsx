@@ -14,6 +14,7 @@ import { BrailleSpinner } from "@/components/braille-spinner";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { SettingsDialogProvider, useSettingsDialog } from "@/components/settings/settings-dialog.tsx";
 import { Hint } from "@/components/ui/hint";
+import { SourceCodeLink } from "@/components/source-link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -1040,7 +1041,7 @@ function SessionsSidebar() {
 					{/* Settings entry (settings-app wave): same row language as
 					    New session — quiet, bottom-pinned, opens the centered
 					    dialog (also mod+, in the keyboard registry). */}
-					<div className="px-3 pb-3 pt-1">
+					<div className="flex items-center justify-between px-3 pb-3 pt-1">
 						<Hint label="Settings" action="open-settings" side="right">
 							<button
 								type="button"
@@ -1052,6 +1053,8 @@ function SessionsSidebar() {
 								Settings
 							</button>
 						</Hint>
+						{/* The AGPL source offer, visible to every user of the app. */}
+						<SourceCodeLink />
 					</div>
 				</div>
 

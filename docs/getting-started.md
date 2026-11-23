@@ -1,6 +1,6 @@
 # Getting started
 
-Download LearnHarness from [learnharness.ai](https://learnharness.ai) or [GitHub Releases](https://github.com/amosblomqvist/learnharness/releases). For running from source, see [Development](development.md).
+Language Harness runs from source; see the [README](../README.md#run-it) and [Development](development.md). (This guide is inherited from LearnHarness; where it says LearnHarness, read Language Harness.)
 
 ## Connect models
 

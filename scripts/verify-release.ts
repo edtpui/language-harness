@@ -105,7 +105,7 @@ type Issues = Issue[];
 // ---------------------------------------------------------------------------
 
 /** Verified product name spelled into every artifact (electron-builder.yml productName). */
-const PRODUCT_NAME = "LearnHarness";
+const PRODUCT_NAME = "LanguageHarness";
 
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
 
@@ -259,7 +259,7 @@ export function verifyConfigAssumptions(config: unknown, pkg: unknown): { ok: tr
 	const errors: Issues = [];
 	const bad = (message: string) => errors.push(message);
 	if (!isPlainObject(pkg) || typeof pkg.version !== "string") bad("package.json has no string version");
-	if (!isPlainObject(pkg) || pkg.name !== "learnharness") bad("package.json name is no longer \"learnharness\"");
+	if (!isPlainObject(pkg) || pkg.name !== "language-harness") bad("package.json name is no longer \"language-harness\"");
 	if (!isPlainObject(config)) {
 		return { ok: false, errors: ["electron-builder.yml did not parse to a mapping", ...errors] };
 	}

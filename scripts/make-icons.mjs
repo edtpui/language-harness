@@ -1,15 +1,10 @@
-// Regenerate the Windows/Linux icon set from the flat design source
-// (build/icon-flat.svg — the owner's Affinity export, rounded squircle
-// with baked transparency, owner ruling 2026-10-13).
+// Regenerate the icon set from the flat design source (build/icon-flat.svg —
+// Language Harness's speech-bubble mark, replacing upstream LearnHarness's
+// artwork).
 //
 //   build/icon.ico  — Windows (.ico with 16/24/32/48/64/128/256 PNG entries)
 //   build/icon.png  — Linux (512×512; AppImage/deb/desktop entry)
-//
-// macOS does NOT come from here: build/icon.icon (the Icon Composer
-// document) is the mac source of truth, compiled by actool at package
-// time into Assets.car (macOS 26 Liquid Glass) + a fallback icns; the
-// hand-packed build/icon.icns replaces that fallback's 256px cap via
-// scripts/after-pack.cjs (pre-Tahoe keeps full-res).
+//   build/icon.icns — macOS (PNG entries 16→1024; mac.icon points here)
 //
 // Renders each size DIRECTLY from the SVG (resvg) — sharper squircle
 // edges than downsampling a raster. Committed outputs; rerun only when
@@ -53,3 +48,24 @@ console.log(`build/icon.ico  ${ICO_SIZES.join("/")} — ${(ico.length / 1024).to
 const png512 = render(512);
 writeFileSync(path.join(root, "build", "icon.png"), png512);
 console.log(`build/icon.png  512×512 — ${(png512.length / 1024).toFixed(1)} KB`);
+
+// ---- build/icon.icns: macOS (Language Harness) ---------------------------
+// The fork has no Icon Composer document, so mac uses this icns directly:
+// PNG-payload entries for every standard size, 16 → 1024 (@1x and @2x).
+const ICNS_ENTRIES = [
+	["icp4", 16], ["icp5", 32], ["ic11", 32], ["ic12", 64], ["ic07", 128],
+	["ic13", 256], ["ic08", 256], ["ic14", 512], ["ic09", 512], ["ic10", 1024],
+];
+const icnsChunks = ICNS_ENTRIES.map(([type, size]) => {
+	const png = render(size);
+	const head = Buffer.alloc(8);
+	head.write(type, 0, "ascii");
+	head.writeUInt32BE(png.length + 8, 4);
+	return Buffer.concat([head, png]);
+});
+const icnsHead = Buffer.alloc(8);
+icnsHead.write("icns", 0, "ascii");
+icnsHead.writeUInt32BE(8 + icnsChunks.reduce((sum, chunk) => sum + chunk.length, 0), 4);
+const icns = Buffer.concat([icnsHead, ...icnsChunks]);
+writeFileSync(path.join(root, "build", "icon.icns"), icns);
+console.log(`build/icon.icns ${ICNS_ENTRIES.length} entries — ${(icns.length / 1024).toFixed(1)} KB`);

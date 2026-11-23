@@ -43,14 +43,14 @@ const path = require("node:path");
 // renderer owns the number; this is the IPC widen target).
 const SIDEBAR_AUTOCLOSE = 928;
 
-const PRODUCT_NAME = "LearnHarness";
+const PRODUCT_NAME = "Language Harness";
 
 // APP NAME → userData (owner, 2026-10-10): the Application Support dir is
-// exactly "LearnHarness" in dev AND packaged. Packaged Electron would
-// otherwise derive it from package.json "name" (now lowercase
-// "learnharness"), and productName metadata alone doesn't reach app.name.
-// Must run before the LH_DEV_URL suffix below — dev becomes
-// "LearnHarness-dev".
+// exactly "Language Harness" in dev AND packaged, separate from an installed
+// LearnHarness. Packaged Electron would otherwise derive it from
+// package.json "name" (lowercase "language-harness"), and productName
+// metadata alone doesn't reach app.name. Must run before the LH_DEV_URL
+// suffix below — dev becomes "Language Harness-dev".
 app.setName(PRODUCT_NAME);
 const AUTH_FILE = () => path.join(app.getPath("userData"), "auth.json");
 const DATA_DIR = () => path.join(app.getPath("userData"), "data");
