@@ -189,7 +189,7 @@ supportedLevels: ThinkingLevel[];
 
 ### ModelCatalogEntry cost
 
-Null when LearnHarness cannot estimate prices for this connection.
+Null when Language Harness cannot estimate prices for this connection.
 
 ```ts
 cost: {

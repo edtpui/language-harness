@@ -158,6 +158,7 @@ export interface ChatRecord {
     messages: LhMessage[];
     imageSnapshots?: Record<string, ImageSnapshot>;
     kind?: ChatKind;
+    language?: SessionLanguage;
     tree?: PlanTree;
     turns?: TurnUsage[];
     extractions?: ExtractionRunUsage[];
@@ -167,7 +168,7 @@ export interface ChatRecord {
 }
 ```
 
-**Related types:** [ChatKind](contracts-chat.md#chatkind), [ChatSettings](contracts-chat.md#chatsettings), [ExtractionRunUsage](contracts-chat.md#extractionrunusage), [ImageSnapshot](contracts-chat.md#imagesnapshot), [LhMessage](native-messages.md#lhmessage), [PlanTree](contracts-plan.md#plantree), [SideChatThread](contracts-chat.md#sidechatthread), [TurnUsage](contracts-chat.md#turnusage).
+**Related types:** [ChatKind](contracts-chat.md#chatkind), [ChatSettings](contracts-chat.md#chatsettings), [ExtractionRunUsage](contracts-chat.md#extractionrunusage), [ImageSnapshot](contracts-chat.md#imagesnapshot), [LhMessage](native-messages.md#lhmessage), [PlanTree](contracts-plan.md#plantree), [SessionLanguage](language.md#sessionlanguage), [SideChatThread](contracts-chat.md#sidechatthread), [TurnUsage](contracts-chat.md#turnusage).
 
 **Member index** (including nested object members; inherited members are defined in the linked base types):
 
@@ -178,6 +179,7 @@ export interface ChatRecord {
 - [messages](#chatrecord-messages)
 - [imageSnapshots](#chatrecord-imagesnapshots)
 - [kind](#chatrecord-kind)
+- [language](#chatrecord-language)
 - [tree](#chatrecord-tree)
 - [turns](#chatrecord-turns)
 - [extractions](#chatrecord-extractions)
@@ -229,6 +231,15 @@ The session's kind; an absent field reads as teach.
 
 ```ts
 kind?: ChatKind;
+```
+
+### ChatRecord language
+
+The language pair this session teaches, fixed at creation. Absent on
+records created without one: the agents then ask for it first.
+
+```ts
+language?: SessionLanguage;
 ```
 
 ### ChatRecord tree
@@ -362,6 +373,7 @@ export interface ChatSummary {
     createdAt: string;
     updatedAt: string;
     kind: ChatKind;
+    language?: SessionLanguage;
     messageCount: number;
     phase: Phase3;
     pendingQuestion: boolean;
@@ -370,7 +382,7 @@ export interface ChatSummary {
 }
 ```
 
-**Related types:** [ChatKind](contracts-chat.md#chatkind), [ChatSettings](contracts-chat.md#chatsettings), [Phase3](phases.md#phase3).
+**Related types:** [ChatKind](contracts-chat.md#chatkind), [ChatSettings](contracts-chat.md#chatsettings), [Phase3](phases.md#phase3), [SessionLanguage](language.md#sessionlanguage).
 
 **Member index** (including nested object members; inherited members are defined in the linked base types):
 
@@ -379,6 +391,7 @@ export interface ChatSummary {
 - [createdAt](#chatsummary-createdat)
 - [updatedAt](#chatsummary-updatedat)
 - [kind](#chatsummary-kind)
+- [language](#chatsummary-language)
 - [messageCount](#chatsummary-messagecount)
 - [phase](#chatsummary-phase)
 - [pendingQuestion](#chatsummary-pendingquestion)
@@ -415,6 +428,14 @@ Normalized kind (absent record field reads as teach).
 
 ```ts
 kind: ChatKind;
+```
+
+### ChatSummary language
+
+The session's language pair, when it has one.
+
+```ts
+language?: SessionLanguage;
 ```
 
 ### ChatSummary messageCount

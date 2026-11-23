@@ -39,9 +39,10 @@ describe("graph clusters", () => {
 });
 
 describe("LH mark", () => {
-	it("the ring follows the strong line ink; the spiral gray stays", () => {
+	it("the front bubble follows the strong line ink; the back bubble's gray stays (Language Harness mark)", () => {
 		const html = renderToStaticMarkup(<LhMark />);
-		assert.equal((html.match(/fill:var\(--lh-line-strong\)/g) ?? []).length, 2);
+		assert.equal((html.match(/fill:var\(--lh-line-strong\)/g) ?? []).length, 1);
+		assert.ok(html.includes('fill-rule="evenodd"'), "the dots are cut out, so they show any theme's background");
 		assert.ok(!html.includes("#fff"));
 		assert.ok(html.includes("rgb(148,148,148)"));
 	});
