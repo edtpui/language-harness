@@ -6,7 +6,8 @@ import { finishDictation, useDictation, useDictationTarget, type Dictation } fro
 import { notifySettingsSaved } from "../components/settings-signal.ts";
 import { useDictationLanguage } from "../components/dictation-preference.ts";
 import { isDictationActive, useDictationActive } from "../components/dictation-state.ts";
-import type { UserSettings } from "../src/core/index.ts";
+import { DictationLanguageOverride } from "../components/dictation-override.ts";
+import type { DictationLanguage, UserSettings } from "../src/core/index.ts";
 
 function deferred<T>() {
 	let resolve!: (value: T) => void;
@@ -59,6 +60,8 @@ async function fixture(language: "pl" | "en" = "pl", delayedRead?: Promise<Respo
 		stops: 0,
 		appends: [] as string[],
 		claimed: undefined as ((text: string) => void) | undefined,
+		/** A session's target-language switch (Language Harness). */
+		override: null as DictationLanguage | null,
 	};
 	Socket.all = [];
 	const previous = new Map<string, PropertyDescriptor | undefined>();
@@ -108,7 +111,7 @@ async function fixture(language: "pl" | "en" = "pl", delayedRead?: Promise<Respo
 	let root = createRoot(document.getElementById("root")!);
 	let firstMount = true;
 	const mount = async () => {
-		await act(async () => { root.render(<Harness />); });
+		await act(async () => { root.render(<DictationLanguageOverride.Provider value={state.override}><Harness /></DictationLanguageOverride.Provider>); });
 		// Each fixture is a new server record. Explicitly invalidate a prior
 		// fixture's window-lifetime cache, but do not refetch on remounts.
 		if (firstMount && setting.language !== undefined) {
@@ -182,6 +185,24 @@ test("main recording retains its starting question field when later focus/claims
 	f.state.claimed = (text) => later.push(text); await f.mount();
 	await act(async () => { socket.end(); });
 	assert.deepEqual(first, ["Main reasoning"]); assert.deepEqual(later, []); assert.deepEqual(f.state.appends, []);
+});
+
+test("a session's target-language switch decides the language of the runs it starts (Language Harness)", async () => {
+	const f = await fixture("pl");
+	f.state.override = "zh-HK";
+	await f.mount();
+	await act(async () => { f.dictation.toggle(); });
+	const target = Socket.all[0]!;
+	assert.equal(target.language, "zh-HK", "the switch wins over the app-wide preference");
+	await act(async () => { target.open(); target.final("你好"); });
+	// Switching off mid-run never changes the run already transcribing.
+	f.state.override = null;
+	await f.mount();
+	assert.equal(Socket.all.length, 1);
+	await act(async () => { target.end(); });
+	assert.deepEqual(f.state.appends, ["你好"]);
+	await act(async () => { f.dictation.toggle(); });
+	assert.equal(Socket.all[1]!.language, "pl", "off again: the app-wide preference");
 });
 
 test("waits for the saved language; reconnect preserves it and finals still flush exactly once", async () => {

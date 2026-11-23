@@ -1,9 +1,12 @@
+import type { SessionLanguage } from "@/src/core";
 import { clearOpeningPrompt, OPENING_PROMPT_FAILURE, stashOpeningPrompt } from "./opening-prompt";
 
 interface SessionCreation {
 	title: string;
 	kind?: "practice";
 	graphContext?: { propositions: readonly { id: string; name: string; statement: string }[] };
+	/** The language pair the session is created with (Language Harness). */
+	language?: SessionLanguage;
 }
 
 /** Per source-composer instance. Retain a successful creation if storage

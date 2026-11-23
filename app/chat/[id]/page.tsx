@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { Chat } from "@/components/chat";
+import { SessionLanguageProvider } from "@/components/session-language";
 import { slotsConfigured } from "@/src/core";
 import { compactionInFlight, getChat, isTurnRunning, readSettingsRecord, turnFailure } from "@/src/server";
 
@@ -20,6 +21,9 @@ export default async function ChatPage({
 	// server's 503 stays the truth; this only decides whether the pill rides.
 	const record = readSettingsRecord();
 	return (
+		// The session's language pair: voices for `speak` fences, the header
+		// chip, and the mic's target-language switch all read it.
+		<SessionLanguageProvider language={chat.language ?? null}>
 		<Chat
 			key={chat.id}
 			chatId={chat.id}
@@ -37,5 +41,6 @@ export default async function ChatPage({
 			initiallyInFlight={isTurnRunning(chat.id)}
 			initiallyCompacting={compactionInFlight(chat.id)}
 		/>
+		</SessionLanguageProvider>
 	);
 }

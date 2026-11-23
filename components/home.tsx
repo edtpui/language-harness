@@ -7,7 +7,7 @@ import { CornerDownLeftIcon, DumbbellIcon } from "lucide-react";
 import { GraphView } from "@/components/graph-view";
 import { MinimalHome } from "@/components/minimal-home";
 import { SetupDialog } from "@/components/setup-dialog";
-import { ComposerActions, NodePickerControl } from "@/components/composer-actions";
+import { ComposerActions, NodePickerControl, composerPlaceholder } from "@/components/composer-actions";
 import { useModelSetup, selectedModelUnavailable, openModelPicker, ZeroKeysPill } from "@/components/setup-cta";
 import { DictationBar, joinDictation, useDictation } from "@/components/dictation";
 import { useFieldCycle } from "@/components/field-cycle";
@@ -19,7 +19,9 @@ import { OPENING_PROMPT_FAILURE } from "@/components/opening-prompt";
 import { PathInput } from "@/components/path-input";
 import { AttachFilesButton } from "@/components/attach-files-button";
 import { SessionStarter } from "@/components/start-session";
-import type { TurnUsage } from "@/src/core";
+import { LanguagePairControl, useLanguagePair } from "@/components/language-picker";
+import { pairFromPreference } from "@/components/language-preference";
+import type { LanguageSettings, TurnUsage } from "@/src/core";
 
 /**
  * Home — the knowledge graph is the main view, full-bleed edge to edge
@@ -30,12 +32,15 @@ import type { TurnUsage } from "@/src/core";
 export function Home({
 	initialConfigured,
 	rendering = true,
+	initialLanguage,
 }: {
 	initialConfigured: boolean;
 	/** GRAPH RENDERING off (owner, 2026-10-06): the home's main view is
 	 * the chains view, not the canvas. Read server-side per navigation —
 	 * changing the setting applies on the next visit home. */
 	rendering?: boolean;
+	/** The remembered language pair, read server-side for the first frame. */
+	initialLanguage?: LanguageSettings;
 }) {
 	const controller = useOptionalInteractionLayers();
 	const router = useRouter();
@@ -72,6 +77,10 @@ export function Home({
 	const startingRef = useRef(false);
 	const starterRef = useRef(new SessionStarter());
 	const [startError, setStartError] = useState(false);
+	// The language pair every new session is created with; a send with no
+	// target chosen opens the picker instead (the draft stays).
+	const languagePair = useLanguagePair(initialLanguage);
+	const [languageSignal, setLanguageSignal] = useState(0);
 	/* Run end focuses the topic input (owner, 2026-10-01): the hands are on
 	 * the keyboard from the stop. Falling edge only; this surface's only
 	 * dictation target IS this textarea, so no case-split is needed. */
@@ -122,6 +131,11 @@ export function Home({
 	const begin = async () => {
 		const t = topicRef.current.trim();
 		if (!t || startingRef.current) return;
+		const language = pairFromPreference(languagePair);
+		if (!language) {
+			setLanguageSignal((n) => n + 1);
+			return;
+		}
 		// Unconfigured: the send INTERCEPTS into the setup flow (the draft
 		// stays in the textarea; the learner sends it after Save).
 		if (!configured) {
@@ -157,6 +171,7 @@ export function Home({
 				title: t,
 				...(mode === "practice" ? { kind: "practice" } : {}),
 				...(practiceProps.length > 0 ? { graphContext: { propositions: practiceProps } } : {}),
+				language,
 			}, fetch, JSON.stringify(catalog?.slots.strong));
 			router.push(target);
 		} catch {
@@ -221,6 +236,7 @@ export function Home({
 					    shows the pick HINT so the affordance is discoverable;
 					    teaching mode with nothing picked renders nothing. */}
 					<ComposerActions
+						language={<LanguagePairControl pair={languagePair} openTargetSignal={languageSignal} disabled={busy} />}
 						picker={(practiceProps.length > 0 || mode === "practice") && (
 							<NodePickerControl
 								count={practiceProps.length}
@@ -277,7 +293,7 @@ export function Home({
 								void start();
 							}
 						}}
-						placeholder={mode === "practice" ? "What do you want to practice?" : "What do you want to learn?"}
+						placeholder={composerPlaceholder(mode, languagePair.target?.name)}
 						autoFocus
 						className="field-sizing-content lh-input max-h-48 min-h-10 flex-1 resize-none bg-transparent px-2.5 py-2 outline-none placeholder:text-muted-foreground"
 					/>

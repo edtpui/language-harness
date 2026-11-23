@@ -12,6 +12,7 @@ import {
 } from "../core/side-chat.ts";
 import { collectCitations } from "../core/citations.ts";
 import { COMPACTION_RESERVE_TOKENS } from "../core/compaction.ts";
+import { sessionLanguageInstructions } from "../core/language.ts";
 import { resolveSideQuestionSpec } from "../core/settings-resolution.ts";
 import { modelsNotConfigured, providerKeyMissing as providerKeyMissingEnvelope } from "../core/settings.ts";
 import { piEngineForSpec, type PiEngine } from "../agent/models.ts";
@@ -175,7 +176,9 @@ export function createSideChatService(deps: SideChatDeps): SideChatService {
 		const lesson = sideChatLessonDocument(record.messages);
 		const turns = sideChatModelTurns(modelThread, lesson);
 		if (input.working?.trim()) turns[turns.length - 1]!.text += `\n\nLearner's current working (not submitted):\n${input.working.trim()}`;
-		const instructions = deps.instructions();
+		const instructions = record.language
+			? `${deps.instructions()}\n\n---\n\n${sessionLanguageInstructions(record.language)}`
+			: deps.instructions();
 		const estimatedTokens = Math.ceil((instructions.length + turns.reduce((sum, turn) => sum + turn.text.length, 0)) / 4);
 		if (engine.model.contextWindow > 0 && estimatedTokens > Math.max(1, engine.model.contextWindow - Math.min(COMPACTION_RESERVE_TOKENS, engine.model.maxTokens))) {
 			return Response.json({ error: "This side conversation and lesson exceed the selected model's context window. Select a model with a larger context window." }, { status: 400 });

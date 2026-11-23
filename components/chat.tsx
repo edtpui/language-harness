@@ -45,6 +45,7 @@ import { useAppearance } from "@/components/settings/appearance";
 import { dockContainerMax, layoutFontKey, questionCardGeometry, rootRem, type QuestionLayout } from "@/components/question-layout";
 import { QueuedSteersBody, type QueuedSteerLine } from "@/components/queued-steers";
 import { DictationBar, finishDictation, joinDictation, useDictation, type Dictation } from "@/components/dictation";
+import { DictationTargetSwitch, SessionLanguageChip, useSessionLanguage } from "@/components/session-language";
 import { useFieldCycle } from "@/components/field-cycle";
 import { useOptionalInteractionLayers } from "./interaction-layers";
 import { isInteractionScopeEligible } from "./plugin-input-focus";
@@ -1275,6 +1276,7 @@ export function Chat({
 	// The session's live plan (drives the top-bar chip; the marginalia
 	// derives its own from the same transcript).
 	const planTree = useMemo(() => latestTree(messages), [messages]);
+	const { language: sessionLanguage } = useSessionLanguage();
 
 	// ── Session usage (wave-4 stats bar) ──
 	// The money channel: the record's turns log and read-time server Pi
@@ -1715,6 +1717,7 @@ export function Chat({
 					{/* The plan chip (owner, plan-placement round): session-level
 					    structure beside the phase chip — access to the full-DAG popup
 					    at every width; the marginalia is the wide-screen glance view. */}
+					{sessionLanguage && <SessionLanguageChip language={sessionLanguage} />}
 					{planTree && (
 						<Hint label="Open the full plan" side="bottom">
 <button
@@ -1767,7 +1770,9 @@ export function Chat({
 							{messages.length === 0 && !busy && (
 								<ConversationEmptyState
 									title="New session"
-									description="The teacher will open by probing what you already know."
+									description={sessionLanguage
+										? `The tutor will open with a short placement check of your ${sessionLanguage.target.name}.`
+										: "The tutor will open by asking which language you want to learn."}
 								/>
 							)}
 
@@ -2098,7 +2103,14 @@ export function Chat({
 					cliContextWindow={cliContextWindowOf(nativeMessages)}
 					pricing={pricing}
 					onReserve={setDockReserve}
-					dictationSlot={<DictationBar dictation={dictation} disabled={pluginOwnsDock && !pluginMicAvailable} />}
+					dictationSlot={
+						<div className="flex w-full min-w-0 items-center gap-1.5">
+							<DictationTargetSwitch disabled={pluginOwnsDock && !pluginMicAvailable} />
+							<div className="min-w-0 flex-1">
+								<DictationBar dictation={dictation} disabled={pluginOwnsDock && !pluginMicAvailable} />
+							</div>
+						</div>
+					}
 					dictationCancel={dictation.cancel}
 					queuedSteers={visibleQueuedSteers(steerQueue, nativeMessages)}
 					setupCta={

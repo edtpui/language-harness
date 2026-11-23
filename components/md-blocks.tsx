@@ -27,7 +27,7 @@
  * EXPAND icon (opens the session overlay) when a chat page is mounted.
  */
 
-import { cloneElement, createContext, isValidElement, useContext, useEffect, useRef, useState, type ComponentProps, type ReactNode } from "react";
+import { cloneElement, isValidElement, useContext, useEffect, useRef, useState, type ComponentProps, type ReactNode } from "react";
 import { CheckIcon, CopyIcon, MaximizeIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -43,11 +43,11 @@ import { MermaidError } from "@/components/mermaid-error";
 import { blurAfterPointerClick } from "@/components/focus-hygiene";
 import { chartSize, useSessionMermaid } from "@/components/session-overlay";
 import { Hint } from "@/components/ui/hint";
-import { BUILTIN_MERMAID_LANGUAGE, PluginCodeBlock } from "@/components/plugin-renderers";
+import { BUILTIN_MERMAID_LANGUAGE, BUILTIN_SPEAK_LANGUAGE, PluginCodeBlock } from "@/components/plugin-renderers";
+import { MarkdownDisplayOnlyContext } from "@/components/md-display-only";
+import { SpeakBlock } from "@/components/speak-block";
 
-/** Local rendering profile for host-mounted, display-only Markdown. Ordinary
- * transcript rendering (including SSR/static Streamdown) stays interactive. */
-export const MarkdownDisplayOnlyContext = createContext(false);
+export { MarkdownDisplayOnlyContext };
 
 // ─── The one affordance: the hover-reveal corner copy ────────────────────────
 
@@ -260,6 +260,7 @@ export function MarkdownCode(props: ComponentProps<"code"> & ExtraProps) {
 	const source = codeSource(children);
 
 	if (language === BUILTIN_MERMAID_LANGUAGE) return <MermaidInline chart={source} />;
+	if (language === BUILTIN_SPEAK_LANGUAGE) return <SpeakBlock source={source} meta={meta} incomplete={incomplete} />;
 
 	const startMatch = /startLine=(\d+)/.exec(meta);
 	const startLine = startMatch ? Number.parseInt(startMatch[1]!, 10) : undefined;

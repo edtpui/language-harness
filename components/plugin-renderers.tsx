@@ -12,6 +12,8 @@ import { JobsContext } from "@/components/jobs-context";
 
 /** The Markdown dispatch uses this same exclusive built-in language. */
 export const BUILTIN_MERMAID_LANGUAGE = "mermaid";
+/** Pronunciation audio fences (Language Harness), equally exclusive. */
+export const BUILTIN_SPEAK_LANGUAGE = "speak";
 
 /** Only actual exclusive presentation claims: not every backend/internal tool.
  * A function avoids eager access across the existing artifact/chat module cycle. */

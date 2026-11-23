@@ -118,8 +118,8 @@ describe("DraftShell — the sessionless surface", () => {
 		assert.ok(html.includes('data-testid="stats-model"'));
 		// No CTA by default: a configured surface stays quiet.
 		assert.ok(!html.includes('data-testid="setup-cta"'));
-		// The same empty state a fresh chat shows.
-		assert.ok(html.includes("The teacher will open by probing what you already know."));
+		// The language-first empty state (Language Harness): no target chosen yet.
+		assert.ok(html.includes("Choose a language to learn above. The tutor will open with a short placement check."));
 		// The pointer-events pattern (953b22b): the wrapper stays inert…
 		assert.ok(html.includes("pointer-events-none"));
 		// …and the blob re-enables it.
@@ -174,7 +174,7 @@ describe("the practice draft (?mode=practice, 2026-10-04)", () => {
 			/>,
 		);
 		assert.match(html, /New practice session/);
-		assert.ok(html.includes("Pick nodes from your knowledge graph, describe what you want to practice, or bring your own problem."));
+		assert.ok(html.includes("Pick nodes from your knowledge graph, describe what you want to practice, or bring a text or exercise of your own."));
 		assert.match(html, /What do you want to practice\?/);
 	});
 

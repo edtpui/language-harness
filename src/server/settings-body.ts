@@ -32,6 +32,7 @@ import { BACKGROUND_MODEL_ROLES, CACHE_RETENTIONS, COMPACTION_THRESHOLD_FLOOR, C
 import { WRITABLE_TOOL_KEYS } from "../core/pending.ts";
 import { isSearchEngineId, SEARCH_ENGINES } from "../core/search.ts";
 import { isDictationLanguage } from "../core/dictation.ts";
+import { LANGUAGE_NAME_MAX, parseLanguageRef, type LanguageSettings } from "../core/language.ts";
 import { parseFileAccessSettings } from "../core/file-access.ts";
 
 /** Parsed-or-rejected — `ok: false` carries the 400's error message. */
@@ -460,6 +461,21 @@ export function parseCompactionSettingsBody(body: unknown): SettingsBodyResult<C
 	return { ok: true, settings };
 }
 
+/** language: { target?: LanguageRef, base?: LanguageRef } — the picker's
+ *  remembered pair. Strict: a present but invalid half is a 400. */
+export function parseLanguageSettingsBody(body: unknown): SettingsBodyResult<LanguageSettings> {
+	const raw = asRecord(body);
+	if (!raw) return { ok: false, error: "Invalid JSON body" };
+	const settings: LanguageSettings = {};
+	for (const half of ["target", "base"] as const) {
+		if (raw[half] === undefined) continue;
+		const language = parseLanguageRef(raw[half]);
+		if (!language) return { ok: false, error: `${half} must be { tag } with a valid BCP 47 language tag, or { name } (letters, at most ${LANGUAGE_NAME_MAX} characters)` };
+		settings[half] = language;
+	}
+	return { ok: true, settings };
+}
+
 /** dictation: { language?: one of Nova-3's supported language codes } */
 export function parseDictationSettingsBody(body: unknown): SettingsBodyResult<DictationSettings> {
 	const raw = asRecord(body);
@@ -520,6 +536,7 @@ export const SETTINGS_SECTIONS = {
 	models: parseModelsSettingsBody,
 	dictation: parseDictationSettingsBody,
 	claudeCode: parseClaudeCodeSettingsBody,
+	language: parseLanguageSettingsBody,
 } as const;
 
 export type SettingsSectionName = keyof typeof SETTINGS_SECTIONS;

@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Loader2Icon, MicIcon } from "lucide-react";
 import { useSettingsDialog } from "@/components/settings/settings-dialog";
 import { Hint } from "@/components/ui/hint";
 import { deepgramListenUrl, type DictationLanguage } from "@/src/core";
 import { useDictationLanguage } from "@/components/dictation-preference";
+import { DictationLanguageOverride } from "@/components/dictation-override";
 import { setDictationActive } from "@/components/dictation-state";
 import { dispatchFocusedPluginShortcut } from "@/components/plugin-input-focus";
 export { isDictationActive } from "@/components/dictation-state";
@@ -346,6 +347,11 @@ export function useDictation({ append, destination = "primary", disabled = false
 	const primary = destination === "primary";
 	const owner = useRef(Symbol("dictation")).current;
 	const { getLanguage } = useDictationLanguage();
+	// A language session can switch dictation to its target language; read
+	// at run start, so a switch never changes a run already in progress.
+	const languageOverride = useContext(DictationLanguageOverride);
+	const languageOverrideRef = useRef(languageOverride);
+	languageOverrideRef.current = languageOverride;
 	const [phase, setPhaseState] = useState<DictationPhase>("idle");
 	const phaseRef = useRef<DictationPhase>("idle");
 	const setPhase = useCallback((next: DictationPhase) => {
@@ -551,7 +557,7 @@ export function useDictation({ append, destination = "primary", disabled = false
 		const gen = ++genRef.current;
 		let language: DictationLanguage;
 		try {
-			language = await getLanguage();
+			language = languageOverrideRef.current ?? await getLanguage();
 		} catch (e) {
 			if (gen !== genRef.current) return;
 			setError(e instanceof Error ? e.message : "Dictation language unavailable");

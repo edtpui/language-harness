@@ -3,19 +3,27 @@
 import type { ReactNode, Ref } from "react";
 import { DumbbellIcon } from "lucide-react";
 
-/** Home and the draft share one wrapping action row. Picker controls lead;
- * setup is centered only when it is the sole action. */
-export function ComposerActions({ picker, setup }: { picker?: ReactNode; setup?: ReactNode }) {
-	if (!picker && !setup) return null;
+/** Home and the draft share one wrapping action row. The language pair and
+ * picker controls lead; setup is centered only when it is the sole action. */
+export function ComposerActions({ language, picker, setup }: { language?: ReactNode; picker?: ReactNode; setup?: ReactNode }) {
+	if (!language && !picker && !setup) return null;
 	return (
 		<div
 			data-testid="composer-actions"
-			className={`pointer-events-auto mb-2 flex flex-wrap items-center gap-2 ${picker ? "justify-start" : "justify-center"}`}
+			className={`pointer-events-auto mb-2 flex flex-wrap items-center gap-2 ${language || picker ? "justify-start" : "justify-center"}`}
 		>
+			{language}
 			{picker}
 			{setup}
 		</div>
 	);
+}
+
+/** The new-session composer's opening question, in terms of the language the
+ *  session will teach. */
+export function composerPlaceholder(mode: "teach" | "practice", target?: string): string {
+	if (mode === "practice") return target ? `What do you want to practice in ${target}?` : "What do you want to practice?";
+	return target ? `What do you want to be able to do in ${target}?` : "What do you want to learn?";
 }
 
 /** Count and Clear stay together if the setup action wraps onto another line.

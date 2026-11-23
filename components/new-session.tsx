@@ -14,10 +14,12 @@ import { SetupDialog } from "@/components/setup-dialog";
 import { useModelSetup, selectedModelUnavailable, openModelPicker, ZeroKeysPill } from "@/components/setup-cta";
 import { StatsBar } from "@/components/stats-bar";
 import { ChainTableOverlay } from "@/components/chain-table.tsx";
-import { ComposerActions, NodePickerControl } from "@/components/composer-actions";
+import { ComposerActions, NodePickerControl, composerPlaceholder } from "@/components/composer-actions";
 import { OPENING_PROMPT_FAILURE } from "@/components/opening-prompt";
 import { SessionStarter } from "@/components/start-session";
-import type { ChatSettings, GraphSnapshot } from "@/src/core";
+import { LanguagePairControl, useLanguagePair } from "@/components/language-picker";
+import { pairFromPreference } from "@/components/language-preference";
+import type { ChatSettings, GraphSnapshot, LanguageSettings, SessionLanguage } from "@/src/core";
 
 /** The draft's pick set (owner round 10): the SAME shape the home pick
  *  bar lifts — resolved nodes as the learner SAW them at pick time. */
@@ -50,6 +52,7 @@ export async function startDraftSession(
 	picks?: readonly DraftPick[],
 	starter = new SessionStarter(),
 	settingsIdentity?: string,
+	language?: SessionLanguage,
 ): Promise<string | null> {
 	const t = text.trim();
 	if (!t) return null;
@@ -58,9 +61,12 @@ export async function startDraftSession(
 	// same contract as the home screen's practice send (the marker with
 	// [id] name: statement lines, target validation's truth set).
 	return starter.start(
-		mode === "practice"
-			? { title: t, kind: "practice", ...(picks && picks.length > 0 ? { graphContext: { propositions: picks } } : {}) }
-			: { title: t },
+		{
+			...(mode === "practice"
+				? { title: t, kind: "practice" as const, ...(picks && picks.length > 0 ? { graphContext: { propositions: picks } } : {}) }
+				: { title: t }),
+			...(language ? { language } : {}),
+		},
 		fetchLike,
 		settingsIdentity,
 	);
@@ -83,7 +89,13 @@ export function DraftShell({
 	onOpenPicker,
 	onClearPicks,
 	overlay,
+	language,
+	targetName,
 }: {
+	/** The language pair control (Language Harness), leading the action row. */
+	language?: ReactNode;
+	/** The chosen target language's name, for the opening copy. */
+	targetName?: string;
 	busy: boolean;
 	text: string;
 	onChange: (v: string) => void;
@@ -181,8 +193,10 @@ export function DraftShell({
 									title={mode === "practice" ? "New practice session" : "New session"}
 									description={
 										mode === "practice"
-											? "Pick nodes from your knowledge graph, describe what you want to practice, or bring your own problem."
-											: "The teacher will open by probing what you already know."
+											? "Pick nodes from your knowledge graph, describe what you want to practice, or bring a text or exercise of your own."
+											: targetName
+												? `The tutor will open with a short placement check of your ${targetName}.`
+												: "Choose a language to learn above. The tutor will open with a short placement check."
 									}
 								/>
 							</ConversationContent>
@@ -191,6 +205,7 @@ export function DraftShell({
 						<div className="bg-background pb-4">
 							<div className={DOCK}>
 								<ComposerActions
+									language={language}
 									picker={(picks.length > 0 || mode === "practice") && (
 										<NodePickerControl count={picks.length} onOpen={onOpenPicker} onClear={onClearPicks} />
 									)}
@@ -212,7 +227,7 @@ export function DraftShell({
 										// input (owner refinement round, 2026-09-24) — no lesson has
 										// started yet, so the composer must not read like one is in
 										// flight.
-										placeholder={mode === "practice" ? "What do you want to practice?" : "What do you want to learn?"}
+										placeholder={composerPlaceholder(mode, targetName)}
 									/>
 								</div>
 								<StatsBar
@@ -239,8 +254,15 @@ export function DraftShell({
 	);
 }
 
-export function NewSession({ initialConfigured, mode = "teach" }: { initialConfigured: boolean; mode?: "teach" | "practice" }) {
+export function NewSession({ initialConfigured, mode = "teach", initialLanguage }: {
+	initialConfigured: boolean;
+	mode?: "teach" | "practice";
+	/** The remembered language pair, read server-side for the first frame. */
+	initialLanguage?: LanguageSettings;
+}) {
 	const router = useRouter();
+	const languagePair = useLanguagePair(initialLanguage);
+	const [languageSignal, setLanguageSignal] = useState(0);
 	const [text, setText] = useState("");
 	/* The draft MIRROR ("nothing gets lost" round, 2026-10-01): the shell's
 	 * finish-first send calls THIS send after the dictation flush — which
@@ -293,6 +315,12 @@ export function NewSession({ initialConfigured, mode = "teach" }: { initialConfi
 	const send = useCallback(() => {
 		const draft = textRef.current.trim();
 		if (!draft || startingRef.current) return;
+		// No target language: open the picker; the draft stays.
+		const language = pairFromPreference(languagePair);
+		if (!language) {
+			setLanguageSignal((n) => n + 1);
+			return;
+		}
 		if (!configured) {
 			setSetupOpen(true);
 			return;
@@ -316,7 +344,7 @@ export function NewSession({ initialConfigured, mode = "teach" }: { initialConfi
 		setBusy(true);
 		setStartError(false);
 		void startDraftSession(draft, fetch, mode === "practice" ? "practice" : undefined, mode === "practice" ? picksRef.current : undefined,
-			starterRef.current, JSON.stringify(catalog?.slots.strong))
+			starterRef.current, JSON.stringify(catalog?.slots.strong), language)
 			.then((target) => {
 				if (target) router.push(target);
 				else { startingRef.current = false; setBusy(false); }
@@ -326,7 +354,7 @@ export function NewSession({ initialConfigured, mode = "teach" }: { initialConfi
 				setBusy(false);
 				setStartError(true);
 			});
-	}, [router, configured, zeroKeys, catalog, mode]);
+	}, [router, configured, zeroKeys, catalog, mode, languagePair]);
 
 	return (
 		<>
@@ -337,6 +365,8 @@ export function NewSession({ initialConfigured, mode = "teach" }: { initialConfi
 				onChange={applyText}
 				onSend={send}
 				mode={mode}
+				language={<LanguagePairControl pair={languagePair} openTargetSignal={languageSignal} disabled={busy} />}
+				targetName={languagePair.target?.name}
 				picks={picks}
 				onOpenPicker={openPicker}
 				onClearPicks={() => applyPicks([])}

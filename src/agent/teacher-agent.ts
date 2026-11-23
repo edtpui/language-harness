@@ -23,6 +23,7 @@ import { createReadTool, readTool } from "./tools/read.ts";
 import { quizInputObject, quizInputProblems } from "../core/question-core.ts";
 import { QUESTION_TOOLS, TOGGLEABLE_TOOLS, type EnabledTools } from "../core/pending.ts";
 import type { PluginToolContext } from "../core/plugins.ts";
+import { sessionLanguageInstructions, type SessionLanguage } from "../core/language.ts";
 import { toLlmMessages, nativeInputCause, PRACTICE_PROBLEM_TOOL } from "../core/native-messages.ts";
 import type { ChatGPTRequestCycle } from "./chatgpt-request-cycle.ts";
 import { usageWasAdmitted } from "./subscription-request-cycle.ts";
@@ -148,6 +149,11 @@ export interface AgentBuildOptions {
 	 *  fresh per turn, honoring enabled overrides (switch on + file
 	 *  exists); absent → the cached pure-source composition. */
 	promptSwitches?: Record<string, boolean>;
+	/** The session's language pair (Language Harness), appended to the
+	 *  composed instructions as their own section. `null` = the record has
+	 *  none, so the agent is told to ask; absent = no section (tests and
+	 *  callers outside a session). */
+	sessionLanguage?: SessionLanguage | null;
 	/** Native conversation identity: the existing persisted chat id, reused
 	 * across reconstructed prober, teacher, and practice Agents.
 	 * Debug: when set AND LH_PROVIDER_EVENTS=1, raw provider stream events
@@ -214,7 +220,10 @@ function baseAgentOptions(kind: AgentKind, opts: AgentBuildOptions, tools: Agent
 	const composedPrompt = opts.promptSwitches
 		? composeInstructions(kind, opts.promptSwitches)
 		: composedInstructions[kind]!;
-	const builtinPrompt = narrationGuard ? `${composedPrompt}\n\n---\n\n${SEND_TO_USER_DELIVERY_RULE}` : composedPrompt;
+	const languagePrompt = opts.sessionLanguage === undefined
+		? composedPrompt
+		: `${composedPrompt}\n\n---\n\n${sessionLanguageInstructions(opts.sessionLanguage)}`;
+	const builtinPrompt = narrationGuard ? `${languagePrompt}\n\n---\n\n${SEND_TO_USER_DELIVERY_RULE}` : languagePrompt;
 	// Bind native read and preserve the kind/model-aware Claude output gate
 	// before resolving additive plugins. Explicit registries remain caller-owned.
 	const builtinTools = [

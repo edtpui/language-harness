@@ -36,6 +36,7 @@ import type { ModelRole } from "../../config.ts";
 import type { ChatSettings } from "./contracts/chat.ts";
 import { isSearchEngineId, type SearchEngineId } from "./search.ts";
 import { isDictationLanguage, type DictationLanguage } from "./dictation.ts";
+import { sanitizeLanguageSettings, type LanguageSettings } from "./language.ts";
 import { parseFileAccessSettings, type FileAccessSettings } from "./file-access.ts";
 import { COLOR_OVERRIDE_KEYS, isThemeId, type AppearanceColorOverrides } from "./themes.ts";
 
@@ -531,6 +532,8 @@ export interface UserSettings {
 	appearance?: AppearanceSettings;
 	graph?: GraphSettings;
 	compaction?: CompactionSettings;
+	/** The new-session picker's remembered language pair. */
+	language?: LanguageSettings;
 	[key: string]: unknown;
 }
 
@@ -937,6 +940,7 @@ export function sanitizeUserSettings(raw: unknown): UserSettings | null {
 	if (r.compaction !== undefined && r.compaction !== null && typeof r.compaction === "object") {
 		out.compaction = sanitizeCompaction(r.compaction as Record<string, unknown>);
 	}
+	if (r.language !== undefined) out.language = sanitizeLanguageSettings(r.language);
 	// Unknown top-level keys ride along untouched (forward-compat). One
 	// known-DEAD key is stripped instead of riding: `chat` (the old
 	// default-settings section) died with per-session models (owner,

@@ -11,11 +11,13 @@ The runtime composes prompts for **prober**, **teacher** and **practice** agents
 | Practice | sorted `practice/` fragments → the curated shared appendix below; **no teaching base** |
 | Side questions | [`side-chat/00-base.md`](side-chat/00-base.md) → shared `10-voice.md`, `15-accuracy.md`, `40-formatting.md` → final side-only [`90-style.md`](side-chat/90-style.md); composed by [`src/agent/side-chat.ts`](../side-chat.ts), not by the segment loader |
 
+**Session language (Language Harness).** After the composed segments (and before any plugin appendix), each conversation agent gets a generated `## This session's language` section from [`sessionLanguageInstructions`](../../core/language.ts): the session's target and explanation languages, whether audio and dictation exist for the target, and text direction. A record without a pair gets the section that tells the agent to ask for one. Side questions get the same section when the session has a pair. It is generated per turn from the chat record, not an editable segment.
+
 Directory discovery accepts only filenames matching `^\d+-[\w.-]+\.md$` and sorts them lexicographically by filename. Keep numeric prefixes consistently padded when order matters. The teaching base supplies the agent's purpose/philosophy; voice, accuracy, mental-model, question, confidence, file and formatting guidance are separate shared fragments. The teacher's method and planning/teaching doctrine live in its own directory; probing doctrine lives in `prober/`.
 
 The side-question base is not an editable segment (it is not listed in Settings); its shared appendix honors enabled overrides by the same keys the other agents use.
 
-Practice has its own base and doctrine. Its shared appendix is explicitly allowlisted in the loader: `10-voice.md`, `15-accuracy.md`, `16-mental-model.md`, `35-side-conversations.md` and `40-formatting.md`, in sorted order. Other shared fragments do **not** automatically enter practice. Adding a new shared fragment includes it in prober/teacher composition, but not practice unless the allowlist changes.
+Practice has its own base and doctrine. Its shared appendix is explicitly allowlisted in the loader: `10-voice.md`, `15-accuracy.md`, `16-mental-model.md`, `35-side-conversations.md`, `40-formatting.md` and `45-target-language.md`, in sorted order. Other shared fragments do **not** automatically enter practice. Adding a new shared fragment includes it in prober/teacher composition, but not practice unless the allowlist changes.
 
 ## Overrides and defaults
 

@@ -32,6 +32,7 @@ import type {
 	NotesSource,
 } from "./contracts.ts";
 import type { UserSettings } from "./settings.ts";
+import type { SessionLanguage } from "./language.ts";
 import type { Theme, ThemeFile } from "./themes.ts";
 
 // ─── Plugin sessions — plugin-owned data, separate from core chats ──────────
@@ -53,10 +54,10 @@ export interface PluginTaskRecordStore {
 // ─── ChatStore — the session record's home (data/chats) ─────────────────────
 
 export interface ChatStore {
-	/** Create a session record (persisted immediately). */
-	/** Create a session record; kind "practice" marks a practice session
-	 *  (absent = teach, the default). */
-	createChat(title: string, kind?: "practice"): ChatRecord;
+	/** Create a session record (persisted immediately); kind "practice"
+	 *  marks a practice session (absent = teach, the default). The language
+	 *  pair, when given, is stamped once and never rewritten. */
+	createChat(title: string, kind?: "practice", language?: SessionLanguage): ChatRecord;
 	/** The full record, or null if unknown id / corrupt file. */
 	getChat(id: string): ChatRecord | null;
 	/** All sessions, newest activity first (the sidebar's list view). */

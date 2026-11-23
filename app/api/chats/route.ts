@@ -1,5 +1,6 @@
 import { chainsForSelection, formatChainLine } from "@/src/core";
 import { newGraphContextMessage, type GraphContextPick } from "@/src/core";
+import { DEFAULT_BASE_LANGUAGE, parseSessionLanguage, type SessionLanguage } from "@/src/core";
 import { compactionInFlight, createChat, isTurnRunning, listChats, readSettingsRecord, stores, titleFromPrompt } from "@/src/server";
 import type { ChatListItem } from "@/src/core";
 
@@ -20,12 +21,25 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-	const body = (await req.json().catch(() => ({}))) as { title?: unknown; kind?: unknown; graphContext?: unknown };
+	const body = (await req.json().catch(() => ({}))) as { title?: unknown; kind?: unknown; graphContext?: unknown; language?: unknown };
 	const title = typeof body.title === "string" ? body.title : "";
 	// Practice sessions (owner, 2026-10-04): kind "practice" marks the
 	// record — the practice agent + its tools from turn 1, no extraction.
 	const kind = body.kind === "practice" ? ("practice" as const) : undefined;
-	const chat = createChat(titleFromPrompt(title || "Untitled session"), kind);
+	// The session's language pair (Language Harness): the picker sends it;
+	// a malformed pair is refused before any record exists. Without one,
+	// the remembered pair from settings applies when it is complete; with
+	// neither, the record has no pair and the agents ask for it.
+	let language: SessionLanguage | undefined;
+	if (body.language !== undefined) {
+		const parsed = parseSessionLanguage(body.language);
+		if (!parsed) return Response.json({ error: "language must be { target, base }, each { tag } or { name }" }, { status: 400 });
+		language = parsed;
+	} else {
+		const remembered = readSettingsRecord()?.language;
+		if (remembered?.target) language = { target: remembered.target, base: remembered.base ?? DEFAULT_BASE_LANGUAGE };
+	}
+	const chat = createChat(titleFromPrompt(title || "Untitled session"), kind, language);
 	// PER-SESSION MODELS (owner, 2026-09-28): a session owns its model +
 	// thinking level from birth — stamped verbatim from the STRONG slot,
 	// the new-session default. From here the strong slot never reaches
