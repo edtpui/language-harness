@@ -19,7 +19,7 @@
 
 ## Teaching method
 
-[The theory of learning and teaching](teaching-methodology.md) is the owner's theory underlying the teaching method. It is not a runtime specification or evidence of measured learning outcomes.
+[The theory of teaching a language](language-methodology.md) is Language Harness's adaptation of LearnHarness's method to languages, and the basis of its prompts. [The theory of learning and teaching](teaching-methodology.md) is LearnHarness's original theory for concept learning, which it builds on. Neither is a runtime specification or evidence of measured learning outcomes.
 
 ## History
 

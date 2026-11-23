@@ -1,5 +1,7 @@
 # Security policy
 
+> **Language Harness** is a fork of LearnHarness. Report vulnerabilities in code this fork added or changed (language sessions, audio, the source link) privately to the owner of [this repository](https://github.com/edtpui/language-harness): use GitHub's private vulnerability reporting there if it is enabled, or open an issue asking for a private channel without any details. Report vulnerabilities in LearnHarness itself to its maintainers as described below.
+
 LearnHarness stores API keys, sign-in tokens, chats, and learning records on your machine, and its agent reads files and fetches web content on your behalf. If you find a way to abuse any of that, please tell us privately so a fix can ship before the details are public.
 
 ## Reporting a vulnerability

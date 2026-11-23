@@ -1,88 +1,63 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/lh_banner_dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="docs/assets/lh_banner_light.png">
-    <img src="docs/assets/lh_banner_light.png" alt="LearnHarness" width="640">
-  </picture>
-</p>
+# Language Harness
 
-<p align="center"><strong>An agent harness for learning.</strong></p>
+**An agent harness for learning languages — any language.**
 
-<p align="center">
-  <a href="https://learnharness.ai">Download</a> ·
-  <a href="#how-it-works">How it works</a> ·
-  <a href="docs/README.md">Documentation</a> ·
-  <a href="https://github.com/amosblomqvist/learnharness/issues">Issues</a> ·
-  <a href="https://discord.gg/5tCHHQEB2e">Discord</a>
-</p>
+Language Harness uses AI agents to take you from what you can already do in a language to what you want to be able to do with it. It measures where your ability ends, plans the shortest route to your goal, and teaches one new word, form or pattern at a time, with audio for everything you should hear. Practice sessions then make the language come to mind when you need it.
 
-LearnHarness uses AI agents to plan and teach lessons from your current understanding to your goal. It builds a detailed picture of what you understand and how you reason. That picture is updated as you learn.
-
-Instead of just giving you an explanation, it uses your answers and thinking to decide what you need next. Teaching builds understanding one reasoning step at a time. Practice makes it usable. A persistent knowledge graph carries it across sessions.
-
-![LearnHarness teaching session](docs/assets/teaching-session.png)
+> **A modified version of [LearnHarness](https://github.com/amosblomqvist/learnharness)** by Amos Blomqvist, forked from LearnHarness v0.7.0 on 2026-11-23 and changed to teach languages instead of general concepts. Like LearnHarness, it is free software under the [GNU AGPL-3.0](LICENSE). The [changes](#what-changed-from-learnharness) are listed below.
 
 ## How it works
 
-1. **Measure.** Before teaching, the agent finds where your understanding ends on each part the lesson depends on. Your answers, confidence, and thinking show it where to start.
-2. **Plan.** It works out a dependency map from that starting point to your goal. You can see the plan, and the lesson adapts when your understanding turns out different.
-3. **Teach.** Each step builds on something you already understand. You predict, get an explanation, and check your understanding. Confusions are repaired before anything is built on them. The aim is for the goal to feel obviously true, not merely familiar.
-4. **Practice.** Separate sessions pose varied problems that require the right knowledge to come to mind without being named first. Problems and hints adapt to your reasoning.
+1. **Placement.** Before teaching, the tutor pins down what you want to do with the language (travel, conversation, reading, family, an exam), which variety you need, and which skills matter. Then it brackets your level on each strand — sound, script, vocabulary, grammar, comprehension, production — with real sentences to understand, build or hear. Complete beginners skip straight to what transfers from the languages they already know.
+2. **Plan.** It works out a dependency map from that starting point to your goal: the core patterns at the bottom, the structures and vocabulary your goal needs above them. You see the map and can change it; it adapts when your answers show something different.
+3. **Teach.** Each step brings in one new element inside language you already understand. Examples come before rules, so you notice the pattern before it is named; minimal pairs isolate exactly what is new; differences from your own language are named before they turn into errors. Every step ends with a check that makes you use the new element in a sentence you haven't seen.
+4. **Practice.** Separate sessions pose short, varied demands — recall, telling confusable forms apart, building whole utterances — interleaved across what you've learned, with hints held to the minimum and retests in fresh sentences.
 
-**Think out loud.** The thinking fields let you explain your reasoning, uncertainties, and reactions in your own words. This is how the agent gets a detailed picture rather than just a record of right and wrong answers. You can type or use dictation.
+The tutor writes explanations in your language and moves more of its own prose into the target language as your level allows. Words and rules taught in lessons accumulate in a persistent knowledge graph that later sessions build on.
 
-**Bring your files.** In the desktop app, attach PDFs, photos, or any other file with the paperclip, or drag them in. The file stays where it is: the message carries its path, and the agent reads it from there.
+### Hear it, say it
 
-The agent can also research questions in the background, create visual explanations, show your own images in the lesson and mark them up with arrows and labels (including figures it crops straight out of your PDFs, such as lecture slides), and build interactive demonstrations.
+- **Pronunciation audio.** Every phrase the tutor wants you to hear comes in a `speak` block with play buttons (normal or slow, one line or the whole dialogue). Listening exercises hide the text until you reveal it.
+- **Your device's voices.** Audio uses the browser's built-in speech synthesis: free and keyless, but coverage depends on the device. Phones and Microsoft Edge have voices for many languages; desktop Chromium has fewer; the desktop app has only the operating system's voices. When no voice exists for a language, the block says so and still shows the text.
+- **Speaking practice.** With a Deepgram key, dictation can transcribe the target language: the switch next to the microphone toggles between your usual dictation language and the session's target (shown for the [languages Deepgram Nova-3 supports](https://developers.deepgram.com/docs/models-languages-overview)).
 
-## Knowledge that carries forward
+### Any language
 
-What you are taught accumulates as propositions and reasoning chains: individual claims and the premises that lead to them. The graph shows this structure, with links back to the source sessions. You can also import notes.
+Pick from the list (about a hundred languages, each with its standard tag, so voices and dictation work) or type any language's name — a heritage dialect, a classical language, a constructed one. Languages without a known tag are taught without audio or dictation, with pronunciation given in writing. You can also choose the language explanations are written in, including the target language itself if you're refining one you already speak.
 
-Future teaching sessions can read the graph instead of starting from scratch. Practice sessions can draw their material from it. It stores the ideas and their connections, not ratings of your ability.
+## Run it
 
-![LearnHarness knowledge graph](docs/assets/knowledge-graph.png)
+Language Harness currently runs from source. It needs Node.js 22 or newer (CI uses Node 26).
 
-## Download and get started
+```sh
+npm ci
+npm run plugins:setup   # local SDKs and locked plugin dependencies
+npm run dev             # http://localhost:3000
+```
 
-**[Download from learnharness.ai](https://learnharness.ai)** · [GitHub Releases](https://github.com/amosblomqvist/learnharness/releases)
+For a production server: `npm run build`, then `npm start`. Open **Settings → Providers** to connect a model provider (API keys, supported subscriptions, the Claude Code CLI, or any OpenAI-compatible endpoint including a local model server), pick your Strong/Cheap/Vision models, choose the language to learn above the composer, and say what you want to be able to do.
 
-- **macOS (Apple Silicon):** signed and notarized DMG. Drag the app to Applications.
-- **Windows (x64):** run the installer. It is currently unsigned; Windows may show an “unknown publisher” or SmartScreen warning.
-- **Linux (x64):** make the AppImage executable and open it, or install the Debian/Ubuntu `.deb`.
+**There is no login.** Anyone who can reach the server can read every session and setting and spend your API credits. Keep it on `localhost` or a private network you trust (a tailnet, for example); never expose it to the public internet without an authenticating proxy in front. To reach it by a host name rather than an IP address, list the name in `LH_ALLOWED_HOSTS` — see [Development](docs/development.md#other-devices-on-your-network).
 
-Choose your models, then start a session with what you want to understand. You can use provider API keys, supported subscription connections in the desktop app, an installed [Claude Code CLI](docs/claude-code.md), or a [custom OpenAI-compatible endpoint](docs/custom-providers.md), including a local model server. Optional dictation and web search use separate service keys. Web research can use a Tavily, Brave, Exa, Firecrawl, or Ollama key in Settings → Providers → Search. Ollama search uses its hosted service, not a local model server.
+The test suite runs with `npm test` (on Windows, run `NODE_ENV=test npx tsx --test "tests/*.test.ts" "tests/*.test.tsx"` from Git Bash, since the npm script uses POSIX environment syntax). Desktop packaging is inherited from LearnHarness and is unsigned in this fork; see [Desktop builds and releases](docs/desktop-release.md).
 
-See [Getting started](docs/getting-started.md) for model setup, dictation, files, and notes imports, and [context, caching, and costs](docs/compaction-accounting.md) for advanced cache preferences.
+## What changed from LearnHarness
 
-All three platforms support in-app updates.
+- **The teaching doctrine.** The prober, teacher, practice and side-question prompts teach languages: placement by skill strand with CEFR-calibrated bracketing, one-new-element steps with examples before rules, production-first checks, transfer-error repair, and practice modes for recall, discrimination and composition. The theory is in [docs/language-methodology.md](docs/language-methodology.md); LearnHarness's original theory stays in [docs/teaching-methodology.md](docs/teaching-methodology.md).
+- **Session languages.** Each session records its target language and explanation language at creation (`src/core/language.ts`); the pair is added to every agent's instructions, remembered for the next session (Settings section `language`), and shown in the session header.
+- **Audio.** `speak` fences with device-voice playback (`components/speak-block.tsx`, `components/speech.ts`), with voice matching that never reads Cantonese with a Mandarin voice or the reverse.
+- **Dictation in the target language,** per session (`components/session-language.tsx`).
+- **Name, icon and feeds.** Renamed to Language Harness with its own icon; desktop updates and startup announcements read this repository, never LearnHarness's.
+- **Source offer.** A *Source* link in the sidebar and a *Source code* row in Settings → General point to this repository (AGPL-3.0 §13).
+
+Everything else — models and providers, plans, the knowledge graph, side questions, research, demos, plugins — is LearnHarness's, documented in [docs/](docs/README.md).
 
 ## Your keys, your data
 
-- **Your keys and models.** No LearnHarness subscription or markup. Billing depends on your provider, CLI configuration, subscription, or local setup. The live cost meter estimates known API costs, not subscription, CLI, or custom-endpoint charges.
-- **Local storage.** Your chats, graph, settings, and API keys live on your machine. Learning records are plain files you can inspect.
-- **External services.** Models run through your configured providers. Model requests send the context needed for the task; web research and dictation also contact external services. Local storage does not mean offline processing.
-- **Inspectable behavior.** System prompts are visible and editable. The app is open source under the AGPL-3.0 license.
+Chats, the knowledge graph, settings and API keys stay on the machine running the server, as plain files. Model requests go to the providers you configure; web research, dictation and speech synthesis on some devices contact external services. Prompts are visible and editable in Settings.
 
-## Development and support
+## License and source
 
-```bash
-npm ci
-npm run plugins:setup
-npm run dev        # http://localhost:3000
-npm test           # fixtures and fake providers
-```
+Language Harness is licensed under the [GNU Affero General Public License v3.0](LICENSE), the same license as LearnHarness. If you run a modified version for other people, the AGPL requires you to offer them its source: build with `LH_SOURCE_URL` set to where that source is published, and the in-app links will point there.
 
-See the [documentation index](docs/README.md) for all guides, [development](docs/development.md) for setup and checks, [architecture](docs/architecture.md) for the runtime, [keyboard shortcuts](docs/keyboard.md), [themes](docs/themes.md) for the theme file format, and [desktop builds and releases](docs/desktop-release.md).
-
-For trusted local plugins, start with the [authoring guide and capability map](docs/plugin-authoring.md). It links the question, practice-problem, submission, view-context and UI contracts. Use [`examples/plugins/`](examples/plugins/) for small runnable templates, [`plugins/`](plugins/) for feature source projects, and the [host architecture](docs/plugin-architecture.md) for internals.
-
-Questions, bug reports, and feature requests: [GitHub Issues](https://github.com/amosblomqvist/learnharness/issues).
-
-Security vulnerabilities: report privately as described in [SECURITY.md](SECURITY.md), not in public issues.
-
-## License
-
-[AGPL-3.0](LICENSE)
-
-The app is free and open forever. If we ever charge for anything, it will be for convenience — managed keys, hosting — never for features you can run locally.
+LearnHarness is © Amos Blomqvist and its contributors; the plugins in `plugins/` carry their own license files.

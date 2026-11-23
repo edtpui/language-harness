@@ -1,5 +1,7 @@
 # Contributing to LearnHarness
 
+> **Language Harness** is a fork. For changes to the language-learning features, open an issue or pull request on [this repository](https://github.com/edtpui/language-harness). The guide below is upstream LearnHarness's, for contributions to LearnHarness itself.
+
 Bug reports, focused fixes, documentation, reviews, and testing are welcome. LearnHarness is a maintainer-led project with a deliberate core learning experience.
 
 ## Project direction
